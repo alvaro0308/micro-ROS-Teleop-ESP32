@@ -1,9 +1,3 @@
-/* UART Echo Example
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <driver/gpio.h>
 #include <rcl/error_handling.h>
 #include <rcl/rcl.h>
@@ -23,19 +17,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #endif
-
-/**
- * This is an example which echos any data it receives on configured UART back
- * to the sender, with hardware flow control turned off. It does not use UART
- * driver event queue.
- *
- * - Port: configured UART
- * - Receive (Rx) buffer: on
- * - Transmit (Tx) buffer: off
- * - Flow control: off
- * - Event queue: off
- * - Pin assignment: see defines below (See Kconfig)
- */
 
 int CONFIG_EXAMPLE_UART_PORT_NUM = 0;
 int CONFIG_EXAMPLE_UART_BAUD_RATE = 115200;
@@ -73,35 +54,34 @@ static const char *TAG = "UART TEST";
              (int)temp_rc);                                           \
     }                                                                 \
   }
-#define LED_BUILTIN 31
 
-rcl_publisher_t publisher;
+rcl_subscription_t subscriber;
 std_msgs__msg__Int32 msg;
 
-void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
-  RCLC_UNUSED(last_call_time);
-  if (timer != NULL) {
-    RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
-    msg.data++;
-  }
-  const char *data = (const char *)malloc(BUF_SIZE);
+void subscription_callback(const void *msgin) {
+  const std_msgs__msg__Int32 *msg = (const std_msgs__msg__Int32 *)msgin;
+  //   printf("Received: %d\n", msg->data);
+  const char *buff = (const char *)malloc(BUF_SIZE);
 
-  data = "f";
-  // Read data from the UART
-  //   int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1),
-  //                             20 / portTICK_PERIOD_MS);
-  //   // Write data back to the UART
-  uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)data, strlen(data));
-  //   if (len) {
-  //     data[len] = '\0';
-  //     ESP_LOGI(TAG, "Recv str: %s", (char *)data);
-  //   }
-  printf("Data: %s strlen: %d\n", data, strlen(data));
+  memset(buff, 0, sizeof(&buff));
+  if (msg->data == 0) {
+    buff = "f";
+  } else if (msg->data == 1) {
+    buff = "l";
+  } else if (msg->data == 2) {
+    buff = "s";
+  } else if (msg->data == 3) {
+    buff = "r";
+  } else if (msg->data == 4) {
+    buff = "b";
+  } else if (msg->data == 5) {
+    buff = "a";
+  }
+
+  uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)buff, strlen(buff));
 }
 
-static void echo_task(void *arg) {}
-
-void appMain(void) {
+void appMain(void *arg) {
   rcl_allocator_t allocator = rcl_get_default_allocator();
   rclc_support_t support;
 
@@ -110,28 +90,18 @@ void appMain(void) {
 
   // create node
   rcl_node_t node;
-  RCCHECK(
-      rclc_node_init_default(&node, "freertos_int32_publisher", "", &support));
+  RCCHECK(rclc_node_init_default(&node, "int32_subscriber_rclc", "", &support));
 
-  // create publisher
-  RCCHECK(rclc_publisher_init_default(
-      &publisher, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-      "freertos_int32_publisher"));
-
-  // create timer,
-  rcl_timer_t timer;
-  const unsigned int timer_timeout = 1000;
-  RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(timer_timeout),
-                                  timer_callback));
+  // create subscriber
+  RCCHECK(rclc_subscription_init_default(
+      &subscriber, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
+      "/microROS/int32_subscriber"));
 
   // create executor
   rclc_executor_t executor;
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
-  RCCHECK(rclc_executor_add_timer(&executor, &timer));
-
-  msg.data = 1000;
-  /* Configure parameters of an UART driver,
-   * communication pins and install the driver */
+  RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &msg,
+                                         &subscription_callback, ON_NEW_DATA));
   uart_config_t uart_config = {
       .baud_rate = ECHO_UART_BAUD_RATE,
       .data_bits = UART_DATA_8_BITS,
@@ -152,15 +122,14 @@ void appMain(void) {
   ESP_ERROR_CHECK(uart_set_pin(ECHO_UART_PORT_NUM, ECHO_TEST_TXD, ECHO_TEST_RXD,
                                ECHO_TEST_RTS, ECHO_TEST_CTS));
 
-  //   xTaskCreate(echo_task, "uart_echo_task", ECHO_TASK_STACK_SIZE, NULL, 10,
-  //               NULL);
   while (1) {
     rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+    usleep(100000);
   }
 
   // free resources
-  RCCHECK(rcl_publisher_fini(&publisher, &node))
-  RCCHECK(rcl_node_fini(&node))
+  RCCHECK(rcl_subscription_fini(&subscriber, &node));
+  RCCHECK(rcl_node_fini(&node));
 
   vTaskDelete(NULL);
 }
