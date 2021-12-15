@@ -39,8 +39,8 @@
 
 int CONFIG_EXAMPLE_UART_PORT_NUM = 0;
 int CONFIG_EXAMPLE_UART_BAUD_RATE = 115200;
-int CONFIG_EXAMPLE_UART_RXD = 3;
-int CONFIG_EXAMPLE_UART_TXD = 1;
+int CONFIG_EXAMPLE_UART_RXD = 16;
+int CONFIG_EXAMPLE_UART_TXD = 17;
 int CONFIG_EXAMPLE_TASK_STACK_SIZE = 2048;
 
 #define ECHO_TEST_TXD (CONFIG_EXAMPLE_UART_TXD)
@@ -84,18 +84,19 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
     RCSOFTCHECK(rcl_publish(&publisher, &msg, NULL));
     msg.data++;
   }
-  uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
+  const char *data = (const char *)malloc(BUF_SIZE);
 
+  data = "f";
   // Read data from the UART
-  int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1),
-                            20 / portTICK_PERIOD_MS);
-  // Write data back to the UART
-  uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)data, len);
-  if (len) {
-    data[len] = '\0';
-    ESP_LOGI(TAG, "Recv str: %s", (char *)data);
-  }
-  printf("Data: %s\n", (const char *)data);
+  //   int len = uart_read_bytes(ECHO_UART_PORT_NUM, data, (BUF_SIZE - 1),
+  //                             20 / portTICK_PERIOD_MS);
+  //   // Write data back to the UART
+  uart_write_bytes(ECHO_UART_PORT_NUM, (const char *)data, strlen(data));
+  //   if (len) {
+  //     data[len] = '\0';
+  //     ESP_LOGI(TAG, "Recv str: %s", (char *)data);
+  //   }
+  printf("Data: %s strlen: %d\n", data, strlen(data));
 }
 
 static void echo_task(void *arg) {}
