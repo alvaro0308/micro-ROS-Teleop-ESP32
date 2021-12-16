@@ -74,10 +74,15 @@ ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
 
 ## Move robot
 O: Forward
+
 1: Left
+
 2: Stop
+
 3: Right
+
 4: Backward
+
 5: Auto
 
 ```
