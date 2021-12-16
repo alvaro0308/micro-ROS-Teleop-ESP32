@@ -1,4 +1,6 @@
 # micro-ROS-Teleop-ESP32
+Move robot using micro-ROS installed in ESP32 and command to Arduino over UART
+
 
 # Installation
 ```
@@ -33,20 +35,7 @@ ros2 run micro_ros_setup flash_firmware.sh
 ros2 run micro_ros_setup create_agent_ws.sh
 ros2 run micro_ros_setup build_agent.sh
 source install/local_setup.bash
-ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
 ```
-
-## Publish message
-### O: Forward
-### 1: Left
-### 2: Stop
-### 3: Right
-### 4: Backward
-### 5: Auto
-```
-ros2 topic pub --once /int1 std_msgs/msg/Int32 '{data: [MESSAGE]}' 
-```
-
 
 ## Debugging Monitor Installation
 ```
@@ -77,4 +66,20 @@ idf.py menuconfig
 ## Launch monitor
 ```
 idf.py -p /dev/ttyUSB0 monitor
+```
+
+## Launch micro-ROS Agent
+```
+ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
+```
+
+## Move robot
+### O: Forward
+### 1: Left
+### 2: Stop
+### 3: Right
+### 4: Backward
+### 5: Auto
+```
+ros2 topic pub --once /int1 std_msgs/msg/Int32 '{data: [MESSAGE]}' 
 ```
