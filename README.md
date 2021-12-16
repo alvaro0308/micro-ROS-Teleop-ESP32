@@ -1,5 +1,5 @@
 # micro-ROS-Teleop-ESP32
-The goal of this program is to move an Arduino Robot using ROS2. To make this possible an ESP32 with micro-ROS is connected to Arduino over UART.
+The goal of this program is to teleoperate an Arduino Robot using ROS2. To make this possible an ESP32 with micro-ROS is connected to Arduino over UART.
 
 # Installation
 ```
