@@ -1,7 +1,7 @@
 # micro-ROS-Teleop-ESP32
 
 # Installation
-``
+```
 mkdir microros_ws
 
 cd microros_ws
@@ -15,7 +15,7 @@ rosdep install --from-path src --ignore-src -y
 colcon build
 
 source install/local_setup.bash
-``
+```
 
 ## Create firmware
 ``
