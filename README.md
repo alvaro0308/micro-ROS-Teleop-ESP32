@@ -15,7 +15,7 @@ source install/local_setup.bash
 ## Create firmware
 ```
 ros2 run micro_ros_setup create_firmware_ws.sh freertos esp32
-ros2 run micro_ros_setup configure_firmware.sh int32_publisher -t udp -i [LOCAL MACHINE IP ADDRESS] -p 8888
+ros2 run micro_ros_setup configure_firmware.sh teleop_arduino -t udp -i [LOCAL MACHINE IP ADDRESS] -p 8888
 ```
 
 ## WIFI configuration
@@ -49,7 +49,7 @@ cd ~/esp/esp-idf
 ## Copy into .bashrc
 ```
 vim ~/.bashrc
-alias get_idf='. $HOME/esp/esp-idf/export.sh'
+alias esp='. $HOME/esp/esp-idf/export.sh'
 ```
 
 ```
@@ -64,6 +64,7 @@ idf.py menuconfig
 
 ## Launch monitor
 ```
+esp
 idf.py -p /dev/ttyUSB0 monitor
 ```
 
@@ -86,5 +87,5 @@ O: Forward
 5: Auto
 
 ```
-ros2 topic pub --once /int1 std_msgs/msg/Int32 '{data: [MESSAGE]}' 
+ros2 topic pub --once /microROS/teleop_arduino std_msgs/msg/Int32 data:\ [ACTION]\
 ```

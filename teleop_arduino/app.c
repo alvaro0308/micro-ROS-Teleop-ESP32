@@ -90,12 +90,12 @@ void appMain(void *arg) {
 
   // create node
   rcl_node_t node;
-  RCCHECK(rclc_node_init_default(&node, "int32_subscriber_rclc", "", &support));
+  RCCHECK(rclc_node_init_default(&node, "teleop_arduino_rclc", "", &support));
 
   // create subscriber
   RCCHECK(rclc_subscription_init_default(
       &subscriber, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-      "/microROS/int32_subscriber"));
+      "/microROS/teleop_arduino"));
 
   // create executor
   rclc_executor_t executor;
