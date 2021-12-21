@@ -90,4 +90,4 @@ O: Forward
 ros2 topic pub --once /microROS/teleop_arduino std_msgs/msg/Int32 data:\ [ACTION]\
 ```
 
-![](https://github.com/alvaro0308/micro-ROS-Teleop-ESP32/blob/master/micro-ROS-Teleop-ESP32/resources/gif.gif)
+![](https://github.com/alvaro0308/micro-ROS-Teleop-ESP32/blob/main/resources/gif.gif)
